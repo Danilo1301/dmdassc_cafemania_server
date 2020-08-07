@@ -1,0 +1,22 @@
+{
+  "Stand": {
+    "from": 0,
+    "to": 0,
+    "views": ["front", "side"]
+  },
+  "Idle": {
+    "from": 1,
+    "to": 3,
+    "views": ["iso_diagonal_front", "iso_diagonal_back"]
+  },
+  "Walk": {
+    "from": 4,
+    "to": 7,
+    "views": ["iso_diagonal_front", "iso_diagonal_back", "iso_front", "iso_back", "iso_side"]
+  },
+  "Eat": {
+    "from": 8,
+    "to": 10,
+    "views": ["iso_diagonal_front", "iso_diagonal_back"]
+  }
+}
