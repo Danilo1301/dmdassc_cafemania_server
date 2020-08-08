@@ -12,8 +12,11 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "author": "Danilo",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": "12.x"
+  }
 }

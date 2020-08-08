@@ -1,8 +1,12 @@
 const express = require('express'), path = require('path'), app = express(), http = require('http').Server(app), io = require('socket.io')(http), cookieParser = require('cookie-parser');
-const settings = {port: 3001, ip: "127.0.0.1"};
+const settings = {port: 3000, ip: "127.0.0.1"};
 
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+    var allowedOrigins = ['http://127.0.0.1:3000', 'http://localhost:3000', 'http://127.0.0.1:3001', 'http://localhost:3001', 'https://dmdassc-cafemania.glitch.me', 'https://cafemania.glitch.me'];
+    var origin = req.headers.origin;
+    if(allowedOrigins.indexOf(origin) > -1){
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
     res.setHeader('Access-Control-Allow-Credentials', true);
@@ -20,8 +24,8 @@ http.listen(settings.port, settings.ip, function() {
   console.log("[server.js] Listening on port " + settings.port);
 });
 
-require("./game/Server.js");
-require("./game/GoogleAuth.js");
-require("./game/Gen3DPlayer.js");
+require("./server/Server.js");
+require("./server/GoogleAuth.js");
+require("./server/Gen3DPlayer.js");
 
 Server.setup(io);
