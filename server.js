@@ -24,6 +24,25 @@ http.listen(settings.port, settings.ip, function() {
   console.log("[server.js] Listening on port " + settings.port);
 });
 
+//-----------
+const fs = require('fs');
+
+var files = ["tileItems\\TileItem.js", "GameLogic.js", "Events.js"];
+var dir = "C:\\Users\\danil\\Desktop\\PC\\Development\\Cafe Mania\\cafemania\\game";
+
+for (var file of files)
+{
+  var from = dir + '\\' + file;
+  var to = '.\\tmpclass\\' + file;
+
+  if(process.env.IS_GLITCH != "true") {
+    fs.copyFileSync(from, to);
+  }
+
+  require("./tmpclass/"+file);
+}
+//---
+
 require("./server/Server.js");
 require("./server/GoogleAuth.js");
 require("./server/Gen3DPlayer.js");

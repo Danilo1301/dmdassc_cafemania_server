@@ -1,26 +1,5 @@
 const fs = require('fs');
 
-function copyClasses()
-{
-
-  var files = ["tileItems\\TileItem.js", "GameLogic.js", "Events.js"];
-  var dir = "C:\\Users\\danil\\Desktop\\PC\\Development\\Cafe Mania\\cafemania\\game";
-
-  for (var file of files)
-  {
-    var from = dir + '\\' + file;
-    var to = '.\\tmp\\' + file;
-
-    if(process.env.IS_GLITCH) {
-      fs.copyFileSync(from, to);
-    }
-
-    require("..\\"+to);
-  }
-}
-
-
-
 User = class {
   constructor(id)
   {
@@ -45,7 +24,6 @@ Server = class {
     this.io = io;
     this.io.on('connection', this.onSocketConnection.bind(this));
 
-    copyClasses();
     GameLogic.gameData = Server.data;
     this.getLocalResources();
   }
