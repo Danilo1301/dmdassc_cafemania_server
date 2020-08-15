@@ -1,0 +1,14 @@
+{
+  "id": "FLOOR_OBJECT_0",
+  "type": "FLOOR_OBJECT",
+  "name": "Floor Object 0",
+  "price": 500,
+  "rotation": "SIDES",
+  "size": [2, 1],
+  "hitbox": {
+	"x": -40,
+	"y": -40,
+	"z": 50
+  },
+  "images": 1
+}

@@ -1,0 +1,14 @@
+{
+  "id": "WALL_OBJECT_1",
+  "type": "WALL_OBJECT",
+  "name": "Wall Object 1",
+  "price": 500,
+  "rotation": "SIDES",
+  "size": [1, 1],
+  "hitbox": {
+	"x": 0,
+	"y": 0,
+	"z": 0
+  },
+  "images": 1
+}

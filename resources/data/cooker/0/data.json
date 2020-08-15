@@ -1,0 +1,14 @@
+{
+  "id": "COOKER_0",
+  "type": "COOKER",
+  "name": "Cooker 0",
+  "price": 500,
+  "rotation": ["BACK"],
+  "size": [1, 2],
+  "hitbox": {
+	"x": 0,
+	"y": 0,
+	"z": 42
+  },
+  "images": 2
+}

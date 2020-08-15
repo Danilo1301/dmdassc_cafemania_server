@@ -1,4 +1,14 @@
 {
+  "id": "FLOOR_1",
+  "type": "FLOOR",
   "name": "Floor 1",
-  "money": 750
+  "price": 500,
+  "rotation": ["BACK", "FLIP"],
+  "size": [1, 1],
+  "hitbox": {
+	"x": 0,
+	"y": 0,
+	"z": 10
+  },
+  "images": 2
 }

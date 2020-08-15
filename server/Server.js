@@ -1,5 +1,26 @@
 const fs = require('fs');
 
+function copyClasses()
+{
+
+  var files = ["tileItems\\TileItem.js", "GameLogic.js", "Events.js"];
+  var dir = "C:\\Users\\danil\\Desktop\\PC\\Development\\Cafe Mania\\cafemania\\game";
+
+  for (var file of files)
+  {
+    var from = dir + '\\' + file;
+    var to = '.\\tmp\\' + file;
+
+    if(process.env.IS_GLITCH) {
+      fs.copyFileSync(from, to);
+    }
+
+    require("..\\"+to);
+  }
+}
+
+
+
 User = class {
   constructor(id)
   {
@@ -13,8 +34,7 @@ Server = class {
   static data = {
     player: {},
     animations: {},
-    floor: {},
-    wall: {}
+    tileItems: {}
   };
 
   static loadedGameLogic = false;
@@ -25,21 +45,11 @@ Server = class {
     this.io = io;
     this.io.on('connection', this.onSocketConnection.bind(this));
 
+    copyClasses();
+    GameLogic.gameData = Server.data;
     this.getLocalResources();
   }
 
-  static loadGameLogic()
-  {
-    if(!this.loadedGameLogic) {
-      require("C:\\Users\\danil\\Desktop\\PC\\Development\\Cafe Mania\\cafemania\\game\\GameLogic.js");
-      require("C:\\Users\\danil\\Desktop\\PC\\Development\\Cafe Mania\\cafemania\\game\\Events.js");
-
-      GameLogic.gameData = Server.data;
-
-      this.loadedGameLogic = true;
-    }
-
-  }
 
   static onSocketConnection(socket)
   {
@@ -49,7 +59,6 @@ Server = class {
 
       if(id == "login") {
 
-        Server.loadGameLogic();
 
         if(!Server.users[data.id]) {
           Server.users[data.id] = new User(data.id);
@@ -57,7 +66,6 @@ Server = class {
         }
 
         var user = Server.users[data.id];
-
         user.userData = GameLogic.userData;
 
         callback({id: user.id, data: Server.data, userData: user.userData});
@@ -68,9 +76,6 @@ Server = class {
           callback(payload['sub']);
         });
       }
-
-      console.log(id, data)
-
     })
   }
 
@@ -79,29 +84,28 @@ Server = class {
     this.data.player = Gen3DPlayer.getData();
     this.data.animations = Gen3DPlayer.getAnimations();
 
-    this.data.wall = this.getGameObjects("wall");
-    this.data.floor = this.getGameObjects("floor");
-
+    this.getTileItems("cooker");
+    this.getTileItems("floor");
 
     console.log(this.data)
   }
 
-  static getGameObjects(name)
+  static getTileItems(name)
   {
     var files = fs.readdirSync('./resources/data/'+name);
 
     for (var f of files) {
-      if(f.includes(".")) {
-        files.splice(files.indexOf(f), 1);
-      }
+      if(f.includes(".")) { files.splice(files.indexOf(f), 1); }
     }
-
-    var objects = {};
 
     for (var file of files) {
-      objects[file] = JSON.parse(fs.readFileSync('./resources/data/' + name + '/' + file + '/data.json', "utf8"));
-    }
+      var data = JSON.parse(fs.readFileSync('./resources/data/' + name + '/' + file + '/data.json', "utf8"));
 
-    return objects;
+      data.id = TILE_ITEM[data.id];
+      data.type = TILE_ITEM_TYPE[data.type];
+      data.path = name + "/" + file;
+
+      this.data.tileItems[data.id] = data;
+    }
   }
 }
