@@ -27,13 +27,13 @@ http.listen(settings.port, settings.ip, function() {
 //-----------
 const fs = require('fs');
 
-var files = ["tileItems\\TileItem.js", "GameLogic.js", "Events.js"];
+var files = ["tileItems/TileItem.js", "GameLogic.js", "Events.js"];
 var dir = "C:\\Users\\danil\\Desktop\\PC\\Development\\Cafe Mania\\cafemania\\game";
 
 for (var file of files)
 {
   var from = dir + '\\' + file;
-  var to = '.\\tmpclass\\' + file;
+  var to = './tmpclass/' + file;
 
   if(process.env.IS_GLITCH != "true") {
     fs.copyFileSync(from, to);
