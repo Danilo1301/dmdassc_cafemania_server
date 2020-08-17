@@ -64,6 +64,7 @@ Server = class {
 
     this.getTileItems("cooker");
     this.getTileItems("floor");
+    this.getTileItems("wall");
 
     console.log(this.data)
   }

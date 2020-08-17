@@ -1,0 +1,14 @@
+{
+  "id": "WALL_0",
+  "type": "WALL",
+  "name": "Wall 0",
+  "price": 500,
+  "rotation": [],
+  "size": [1, 1],
+  "hitbox": {
+	"x": 0,
+	"y": 0,
+	"z": 20
+  },
+  "images": 1
+}
