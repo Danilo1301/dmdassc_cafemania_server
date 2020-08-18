@@ -39,11 +39,128 @@ TILE_ITEM = {
 //front_flipped 0 = 4
 //front_flipped 1 = 5
 
+class TileHitbox
+{
+  static addx(point, amount)
+  {
+    var w = TileMap.tileSize.width/2;
+    var h = TileMap.tileSize.height/2;
+    var hp = Math.sqrt(w*w + h*h);
+
+    point[0] += amount*w/hp
+    point[1] += amount*h/hp
+  }
+
+  static addy(point, amount)
+  {
+    var w = TileMap.tileSize.width/2;
+    var h = TileMap.tileSize.height/2;
+    var hp = Math.sqrt(w*w + h*h);
+
+    point[0] += -amount*w/hp
+    point[1] += amount*h/hp
+  }
+
+  static createBoxHitbox(offsetx, offsety, translate, height)
+  {
+    var point0 = [TileMap.tileSize.width/2, 0];
+    var point1 = [TileMap.tileSize.width, TileMap.tileSize.height/2]
+    var point2 = [TileMap.tileSize.width/2, TileMap.tileSize.height]
+    var point3 = [0, TileMap.tileSize.height/2]
+
+    this.addx(point1, -offsetx[1]);
+    this.addx(point2, -offsetx[1]);
+
+    this.addx(point3, offsetx[0]);
+    this.addx(point0, offsetx[0]);
+
+    this.addy(point0, offsety[0]);
+    this.addy(point1, offsety[0]);
+
+    this.addy(point2, -offsety[1]);
+    this.addy(point3, -offsety[1]);
+
+
+    this.addx(point0, translate[0]);
+    this.addx(point1, translate[0]);
+    this.addx(point2, translate[0]);
+    this.addx(point3, translate[0]);
+
+    this.addy(point0, translate[1]);
+    this.addy(point1, translate[1]);
+    this.addy(point2, translate[1]);
+    this.addy(point3, translate[1]);
+
+    var pts = [
+      point0[0], point0[1]-height,
+      point1[0], point1[1]-height,
+      point1[0], point1[1],
+      point2[0], point2[1],
+      point3[0], point3[1],
+      point3[0], point3[1]-height,
+    ];
+
+    this.hitbox = new PIXI.Graphics();
+    this.hitbox.beginFill(0xffffff);
+    this.hitbox.drawPolygon(pts);
+    this.hitbox.endFill();
+    this.hitbox.alpha = 0.5;
+    this.hitbox.zIndex = 1000;
+    this.hitbox.tint = 0xFF0000;
+
+    return this.hitbox;
+  }
+
+  static createWallHitbox(offsetx, offsety, translate, height)
+  {
+
+    var point0 = [TileMap.tileSize.width/2, 0]; //right bottom
+    var point1 = [TileMap.tileSize.width/2, -TileMap.tileSize.height*2] //right top
+    var point2 = [0, -TileMap.tileSize.height*2 + TileMap.tileSize.height/2] //left top
+    var point3 = [0, TileMap.tileSize.height/2] //left bottom
+
+
+    this.addy(point0, offsetx[1]);
+    this.addy(point1, offsetx[1]);
+
+    this.addy(point2, -offsetx[0]);
+    this.addy(point3, -offsetx[0]);
+
+    this.addx(point1, offsety[0]);
+    this.addy(point1, offsety[0]);
+    this.addx(point2, offsety[0]);
+    this.addy(point2, offsety[0]);
+
+    this.addx(point3, -offsety[1]);
+    this.addy(point3, -offsety[1]);
+    this.addx(point0, -offsety[1]);
+    this.addy(point0, -offsety[1]);
+
+    //this.addy(point1, TileMap.tileSize.height*2);
+
+    var pts = [
+      point0[0], point0[1]-height,
+      point1[0], point1[1]-height,
+      point2[0], point2[1]-height,
+      point3[0], point3[1]-height,
+    ];
+
+    this.hitbox = new PIXI.Graphics();
+    this.hitbox.beginFill(0xffffff);
+    this.hitbox.drawPolygon(pts);
+    this.hitbox.endFill();
+    this.hitbox.alpha = 0.5;
+    this.hitbox.zIndex = 1000;
+    this.hitbox.tint = 0xFF0000;
+
+    return this.hitbox;
+  }
+}
+
 
 class TileItem {
   constructor(data)
   {
-    console.log(data)
 
     this.id = data.id;
     this.uniqueid = data.uniqueid;
@@ -52,166 +169,28 @@ class TileItem {
     this.parts = [];
   }
 
-  createHitbox(height, offset_x, offset_y)
+  update(delta)
   {
-    var wallType = this.type == TILE_ITEM_TYPE.WALL;
 
-    if(this.hitbox) { this.hitbox.destroy(); }
-
-    var w = TileMap.tileSize.width/2;
-    var h = TileMap.tileSize.height/2;
-    var hp = Math.sqrt(w*w + h*h);
-
-    var tileSize = Game.data.tileItems[this.id].size;
-
-    var addx = function(point, amount)
-    {
-      var to_add_x = amount*w/hp;
-      var to_add_y = amount*h/hp;
-
-      point[0] += to_add_x
-      point[1] += to_add_y
-    }
-
-    var addy = function(point, amount)
-    {
-      var to_add_x = amount*w/hp;
-      var to_add_y = amount*h/hp;
-
-      point[0] += -to_add_x
-      point[1] += to_add_y
-    }
-
-
-
-    var extra_x = (tileSize[0]-1)*hp;
-    var extra_y = (tileSize[1]-1)*hp;
-
-    var pts = [];
-
-    if(wallType)
-    {
-      var point0 = [TileMap.tileSize.width/2, 0];
-      var point1 = [TileMap.tileSize.width/2, -TileMap.tileSize.height*2]
-      var point2 = [0, -TileMap.tileSize.height*2 +TileMap.tileSize.height/2]
-      var point3 = [0, TileMap.tileSize.height/2]
-
-      //addx(point2, extra_y);
-      addy(point2, extra_y);
-      addy(point3, extra_y);
-      //addx(point3, extra_y);
-
-      addx(point0, -offset_y);
-      addy(point0, -offset_y);
-
-      addx(point1, offset_y);
-      addy(point1, offset_y);
-
-      addx(point2, offset_y);
-      addy(point2, offset_y);
-
-      addx(point3, -offset_y);
-      addy(point3, -offset_y);
-
-      //--
-
-
-
-      addy(point1, offset_x);
-      addy(point0, offset_x);
-
-      addy(point2, -offset_x);
-      addy(point3, -offset_x);
-
-
-
-
-      pts = [
-        point0[0], point0[1]-height,
-        point1[0], point1[1]-height,
-        point2[0], point2[1]-height,
-        point3[0], point3[1]-height,
-      ];
-
-    } else {
-      var point0 = [TileMap.tileSize.width/2, 0];
-      var point1 = [TileMap.tileSize.width, TileMap.tileSize.height/2]
-      var point2 = [TileMap.tileSize.width/2, TileMap.tileSize.height]
-      var point3 = [0, TileMap.tileSize.height/2]
-
-      addx(point1, extra_x);
-      addx(point2, extra_x);
-
-      addy(point2, extra_y);
-      addy(point3, extra_y);
-
-      addx(point0, offset_x);
-      addx(point1, -offset_x);
-      addx(point2, -offset_x);
-      addx(point3, offset_x);
-
-      addy(point0, offset_y);
-      addy(point1, offset_y);
-      addy(point2, -offset_y);
-      addy(point3, -offset_y);
-
-      pts = [
-        point0[0], point0[1]-height,
-        point1[0], point1[1]-height,
-        point1[0], point1[1],
-        point2[0], point2[1],
-        point3[0], point3[1],
-        point3[0], point3[1]-height,
-      ];
-    }
-
-    console.log(pts)
-
-    this.hitbox = new PIXI.Graphics();
-    this.hitbox.beginFill(0xffffff);
-    this.hitbox.drawPolygon(pts);
-    this.hitbox.endFill();
-    this.hitbox.alpha = 0;
-    this.hitbox.zIndex = 1000;
-    this.hitbox.tint = 0xFF0000;
-
-    this.hitbox.pivot.set(TileMap.tileSize.width/2, TileMap.tileSize.height/2);
-
-    this.hitbox.scale.x = 1;
-
-    this.hitbox.interactive = true;
-    this.hitbox.buttonMode = true;
-    this.hitbox.on('mouseover', this.onMouseOver.bind(this));
-    this.hitbox.on('mouseout', this.onMouseOut.bind(this));
-
-    //console.log(this.hitbox)
-
-    //SceneGameObjects.viewport.container.addChild(this.hitbox);
   }
 
   onMouseOver(event)
   {
-    this.hitbox.alpha = 0.5;
+    console.log("onMouseOver")
+    //this.hitbox.alpha = 0.5;
   }
 
   onMouseOut(event)
   {
-    this.hitbox.alpha = 0;
-  }
-
-  destroySprites()
-  {
-    for (var part of this.parts) { part.sprite.destroy(); }
-    this.parts = [];
-
-    //this.moveSprite.destroy();
+    console.log("onMouseOut")
+    //this.hitbox.alpha = 0;
   }
 
   setRotation(rotation)
   {
     this.data.rotation = rotation;
 
-    this.destroySprites();
+    this.destroy();
     this.createSprites();
     this.createMoveSprite();
 
@@ -234,25 +213,94 @@ class TileItem {
       for (var i = 0; i < tileItemData.images; i++) {
         var name = `${usingRotation.k}_${i}_${t[2]}:${t[3]}`;
         var index = renderTile.textures_index[name];
-        console.log(name, index)
+
         textures.push(renderTile.textures[index]);
       }
 
 
+      var spriteContainer = new PIXI.Container();
 
       var sprite = new PIXI.AnimatedSprite(textures);
       sprite.gotoAndPlay(0);
       sprite.animationSpeed = 0.05;
       sprite.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
-      sprite.scale.x = usingRotation.flipcoords ? -1 : 1;
+
+      spriteContainer.scale.x = usingRotation.flipcoords ? -1 : 1;
+
+
+      if(this.type == TILE_ITEM_TYPE.WALL)
+      {
+        var back = new PIXI.Sprite(Game.resources["wallback"].texture);
+        back.pivot.set((back.width-sprite.width) + TileMap.tileSize.width/2, back.height-TileMap.tileSize.height/2);
+        spriteContainer.addChild(back);
+      }
+
+
+      spriteContainer.addChild(sprite);
+
+      var extremeLeft = t[2] == 0;
+      var extremeRight = t[2] == tileItemData.size[0]-1;
+      var extremeTop = t[3] == 0;
+      var extremeBottom = t[3] == tileItemData.size[1]-1;
+
+      var p1 = [extremeLeft ? tileItemData.hitbox.x : 0, extremeRight ? tileItemData.hitbox.x : 0];
+      var p2 = [extremeTop ? tileItemData.hitbox.y : 0, extremeBottom ? tileItemData.hitbox.y : 0];
+
+      var hitbox;
+
+      if(this.type == TILE_ITEM_TYPE.WALL)
+      {
+
+
+        hitbox = TileHitbox.createWallHitbox(
+          usingRotation.flipcoords ? p2 : p1,
+          usingRotation.flipcoords ? p1 : p2,
+          [0, 0], tileItemData.hitbox.z
+        );
+
+        hitbox.scale.x = usingRotation.flipcoords ? -1 : 1;
+      } else {
+        hitbox = TileHitbox.createBoxHitbox(
+          usingRotation.flipcoords ? p2 : p1,
+          usingRotation.flipcoords ? p1 : p2,
+          [0, 0], tileItemData.hitbox.z
+        );
+      }
+
+      hitbox.alpha = 0;
+      hitbox.interactive = true;
+      hitbox.buttonMode = true;
+      hitbox.pivot.set(TileMap.tileSize.width/2, TileMap.tileSize.height/2);
+
+      hitbox.on('mouseover', this.onMouseOverHitbox.bind(this));
+      hitbox.on('mouseout', this.onMouseOutHitbox.bind(this));
+
+      spriteContainer.addChild(hitbox);
 
       this.parts.push({
         t: t,
-        sprite: sprite
+        container: spriteContainer,
+        sprite: sprite,
+        hitbox: hitbox
       });
     }
 
-    this.createHitbox(tileItemData.hitbox.z, tileItemData.hitbox.x, tileItemData.hitbox.y);
+
+    //this.createHitbox(tileItemData.hitbox.z, tileItemData.hitbox.x, tileItemData.hitbox.y);
+  }
+
+  onMouseOverHitbox()
+  {
+    for (var part of this.parts) {
+      part.container.alpha = 0.5;
+    }
+  }
+
+  onMouseOutHitbox()
+  {
+    for (var part of this.parts) {
+      part.container.alpha = 1;
+    }
   }
 
   createMoveSprite()
@@ -286,74 +334,23 @@ class TileItem {
     this.moveSprite.alpha = 0.5;
   }
 
-
-
-  create()
+  destroy()
   {
-    var tileItemData = Game.data.tileItems[this.id];
-    var ocuppedTiles = GameLogic.getTilesItemOcuppes(this._object);
-    var renderTile = SceneRenderTileItem.tiles[this.id];
-    var usingRotation = GameLogic.getRotationData(this.data.rotation);
+    for (var part of this.parts) {
 
-    var moveContainer = new PIXI.Container();
-
-    for (var t of ocuppedTiles) {
-
-      var textures = [];
-
-      for (var i = 0; i < tileItemData.images; i++) {
-
-        var name = `${usingRotation.k}_${i}_${t[2]}:${t[3]}`;
-
-        var index = renderTile.textures_index[name];
-
-        textures.push(renderTile.textures[index]);
+      if(this.placedAtTile)
+      {
+        //part.container.
+        //this.placedAtTile.topFloor.container.removeChild(part.sprite)
+        //part.container.destroy();
       }
 
 
 
-      var atTile = [this.tile.mapPos.x + t[0], this.tile.mapPos.y + t[1]]
-      atTile = TileMap.tiles[`${atTile[0]}:${atTile[1]}`]
-
-      var pos = TileMap.getTilePosition(t[0], t[1]);
-
-      var sprite = new PIXI.AnimatedSprite(textures);
-      sprite.x = pos.x;
-      sprite.y = pos.y;
-      sprite.gotoAndStop(0);
-      sprite.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
-      sprite.scale.x = usingRotation.flipcoords ? -1 : 1;
-      moveContainer.addChild(sprite);
-
-      this.parts.push({tile: atTile, sprite: sprite});
-
-      //ObjectOrigin.show(sprite, `sprite`);
+      //part.sprite.destroy();
     }
 
-    //var tex = Game.app.renderer.generateTexture(moveContainer); // container with all your sprites as children
-    //this.moveSprite = new PIXI.Sprite(tex);
-
-    moveContainer.destroy();
-
-    for (var part of this.parts) {
-      part.sprite.x = 0;
-      part.sprite.y = 0;
-      part.sprite.animationSpeed = 0.05;
-      part.sprite.gotoAndPlay(0);
-      part.tile.topFloor.container.addChild(part.sprite);
-    }
-
-    //Game.app.stage.addChild(this.moveSprite);
-
-  }
-
-  destroy()
-  {
-    for (var part of this.parts) {
-      part.tile.topFloor.container.removeChild(part.sprite);
-      part.sprite.destroy()
-    }
-    //this.moveSprite.destroy();
+    //if(this.placedAtTile)
   }
 }
 
@@ -375,5 +372,91 @@ class TileItemWall extends TileItem {
   constructor(data)
   {
     super(data);
+
+    this.targetDoorRotation = -0.46;
+    this.isDoorOpen = false;
+    this.hasDoor = false;
+    this.doorDirection = 0;
+    this.doors = [];
+  }
+
+  createDoor()
+  {
+    this.hasDoor = true;
+
+    this.doors = [];
+
+    for (var part of this.parts) {
+
+      var sprite = part.sprite;
+
+      var mask = new PIXI.Sprite(Game.resources["wallmask"].texture);
+      mask.pivot.set((mask.width-sprite.width) + TileMap.tileSize.width/2, mask.height-TileMap.tileSize.height/2);
+
+      part.container.addChild(mask);
+      sprite.mask = mask;
+
+      var door = new PIXI.projection.Sprite2d(PIXI.Texture.from('/assets/images/door.png'));
+      door.anchor.set(1, 1);
+      door.position.set(0, -TileMap.tileSize.height/2);
+      door.proj.affine = PIXI.projection.AFFINE.AXIS_X;
+      door.rotation = -0.46
+
+      part.container.addChild(door);
+
+      this.doors.push(door);
+    }
+  }
+
+  openDoor()
+  {
+    for (var door of this.doors) {
+      this.targetDoorRotation = this.doorDirection == 0 ? -2.8 : 0.6
+    }
+    this.isDoorOpen = true;
+  }
+
+  closeDoor()
+  {
+    for (var door of this.doors) {
+      this.targetDoorRotation = -0.46
+    }
+    this.isDoorOpen = false;
+  }
+
+
+  createSprites()
+  {
+    super.createSprites();
+  }
+
+  setRotation(rotation)
+  {
+    super.setRotation(rotation);
+
+    if(this.hasDoor)
+    {
+      this.createDoor();
+    }
+  }
+
+  flipDoorSide()
+  {
+    for (var door of this.doors) {
+      door.scale.x = -1
+      door.position.x = -TileMap.tileSize.width/2;
+      door.position.y = 0;
+      this.doorDirection = 1;
+    }
+  }
+
+  update(delta)
+  {
+    super.update(delta);
+
+    for (var door of this.doors) {
+      door.scale.y = 1/Game.strechScale; //fixing dump issue
+      door.rotation = Math.lerp(door.rotation, this.targetDoorRotation, 0.1);
+    }
   }
 }

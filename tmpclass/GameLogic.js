@@ -45,11 +45,28 @@ GameLogic = class {
           y: y
         }
 
-        //var customFloor = this.createFloor(Math.random() > 0.5 ? TILE_ITEM.FLOOR_1 : TILE_ITEM.FLOOR_0);
-        //customFloor.data.custom = 123;
-        //this.placeItem(customFloor, x, y);
+        var customFloor = this.createFloor(Math.random() > 0.5 ? TILE_ITEM.FLOOR_1 : TILE_ITEM.FLOOR_0);
+        customFloor.data.custom = 123;
+        this.placeItem(customFloor, x, y);
       }
     }
+
+    for (var y = 0; y < 6; y++) {
+      for (var x = 4; x < 15; x++) {
+        if(Math.random() > 0.3 )
+        {
+          this.userData.tiles[`${x}:${y}`] = {
+            objects: [],
+            x: x,
+            y: y
+          }
+        }
+
+
+      }
+    }
+
+
 
     //console.log(this.userData)
   }
