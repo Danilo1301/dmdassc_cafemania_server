@@ -1,0 +1,14 @@
+{
+  "id": "CHAIR_0",
+  "type": "CHAIR",
+  "name": "Chair 0",
+  "price": 500,
+  "rotation": ["BACK"],
+  "size": [1, 1],
+  "hitbox": {
+	"x": 30,
+	"y": 30,
+	"z": 90
+  },
+  "images": 2
+}

@@ -13,7 +13,8 @@ TILE_ITEM = {
   FLOOR_0: 0,
   FLOOR_1: 1,
   COOKER_0: 2,
-  WALL_0: 3
+  WALL_0: 3,
+  CHAIR_0: 4
 }
 
 //front   [+extra images]
@@ -104,8 +105,6 @@ class TileHitbox
     this.hitbox.beginFill(0xffffff);
     this.hitbox.drawPolygon(pts);
     this.hitbox.endFill();
-    this.hitbox.alpha = 0.5;
-    this.hitbox.zIndex = 1000;
     this.hitbox.tint = 0xFF0000;
 
     return this.hitbox;
@@ -149,8 +148,6 @@ class TileHitbox
     this.hitbox.beginFill(0xffffff);
     this.hitbox.drawPolygon(pts);
     this.hitbox.endFill();
-    this.hitbox.alpha = 0.5;
-    this.hitbox.zIndex = 1000;
     this.hitbox.tint = 0xFF0000;
 
     return this.hitbox;
@@ -161,12 +158,17 @@ class TileHitbox
 class TileItem {
   constructor(data)
   {
+    this.setData(data);
+    this.parts = [];
+  }
 
+  setData(data)
+  {
+    console.log(data)
     this.id = data.id;
     this.uniqueid = data.uniqueid;
     this.data = data.data;
-    this.type = Game.data.tileItems[this.id].type;
-    this.parts = [];
+    this.type = Game.data.tileItems[data.id].type;
   }
 
   update(delta)
@@ -191,11 +193,12 @@ class TileItem {
     this.data.rotation = rotation;
 
     this.destroy();
+
     this.createSprites();
-    this.createMoveSprite();
 
     if(this.placedAtTile)
     {
+      this.placedAtTile.removeItem(this.uniqueid);
       this.placedAtTile.placeItem(this);
     }
   }
@@ -220,13 +223,26 @@ class TileItem {
 
       var spriteContainer = new PIXI.Container();
 
-      var sprite = new PIXI.AnimatedSprite(textures);
-      sprite.gotoAndPlay(0);
-      sprite.animationSpeed = 0.05;
-      sprite.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
+      var sprite;
 
       spriteContainer.scale.x = usingRotation.flipcoords ? -1 : 1;
 
+
+
+      if(this.type == TILE_ITEM_TYPE.CHAIR)
+      {
+        sprite = new PIXI.AnimatedSprite([textures[0]]);
+
+        this.sprite_topchair = new PIXI.AnimatedSprite([textures[1]]);
+        this.sprite_topchair.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
+        this.sprite_topchair.scale.x = usingRotation.flipcoords ? -1 : 1;
+      } else {
+        sprite = new PIXI.AnimatedSprite(textures);
+      }
+
+      sprite.gotoAndPlay(0);
+      sprite.animationSpeed = 0.05;
+      sprite.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
 
       if(this.type == TILE_ITEM_TYPE.WALL)
       {
@@ -250,8 +266,6 @@ class TileItem {
 
       if(this.type == TILE_ITEM_TYPE.WALL)
       {
-
-
         hitbox = TileHitbox.createWallHitbox(
           usingRotation.flipcoords ? p2 : p1,
           usingRotation.flipcoords ? p1 : p2,
@@ -267,7 +281,7 @@ class TileItem {
         );
       }
 
-      hitbox.alpha = 0;
+      hitbox.alpha = 0.2;
       hitbox.interactive = true;
       hitbox.buttonMode = true;
       hitbox.pivot.set(TileMap.tileSize.width/2, TileMap.tileSize.height/2);
@@ -275,7 +289,7 @@ class TileItem {
       hitbox.on('mouseover', this.onMouseOverHitbox.bind(this));
       hitbox.on('mouseout', this.onMouseOutHitbox.bind(this));
 
-      spriteContainer.addChild(hitbox);
+      //spriteContainer.addChild(hitbox);
 
       this.parts.push({
         t: t,
@@ -285,14 +299,19 @@ class TileItem {
       });
     }
 
+    if(this.data.door != undefined)
+    {
+      this.createDoor();
+    }
 
+    //this.createMoveSprite();
     //this.createHitbox(tileItemData.hitbox.z, tileItemData.hitbox.x, tileItemData.hitbox.y);
   }
 
   onMouseOverHitbox()
   {
     for (var part of this.parts) {
-      part.container.alpha = 0.5;
+      part.container.alpha = 0.2;
     }
   }
 
@@ -306,37 +325,23 @@ class TileItem {
   createMoveSprite()
   {
     return
-
-    var moveContainer = new PIXI.Container();
-
-    for (var part of this.parts) {
-      var sprite = part.sprite;
-
-      var pos = TileMap.getTilePosition(part.t[0], part.t[1]);
-
-      sprite.x = pos.x;
-      sprite.y = pos.y;
-
-      moveContainer.addChild(part.sprite);
-    }
-
     var tex = Game.app.renderer.generateTexture(moveContainer); // container with all your sprites as children
     this.moveSprite = new PIXI.Sprite(tex);
-
-    for (var part of this.parts) {
-      moveContainer.removeChild(part.sprite);
-      part.sprite.position.set(0, 0);
-    }
-    moveContainer.destroy();
-
-    SceneTileMap.viewport.container.addChild(this.moveSprite);
-
-    this.moveSprite.alpha = 0.5;
   }
 
   destroy()
   {
+    if(this.sprite_topchair)
+    {
+      this.sprite_topchair.destroy();
+    }
+
     for (var part of this.parts) {
+      console.log(this.parts)
+
+      part.hitbox.destroy();
+      part.sprite.destroy();
+      part.container.destroy();
 
       if(this.placedAtTile)
       {
@@ -345,10 +350,10 @@ class TileItem {
         //part.container.destroy();
       }
 
-
-
       //part.sprite.destroy();
     }
+
+    this.parts = [];
 
     //if(this.placedAtTile)
   }
@@ -362,6 +367,13 @@ class TileItemCooker extends TileItem {
 }
 
 class TileItemFloor extends TileItem {
+  constructor(data)
+  {
+    super(data);
+  }
+}
+
+class TileItemChair extends TileItem {
   constructor(data)
   {
     super(data);
@@ -424,19 +436,13 @@ class TileItemWall extends TileItem {
     this.isDoorOpen = false;
   }
 
-
-  createSprites()
-  {
-    super.createSprites();
-  }
-
   setRotation(rotation)
   {
     super.setRotation(rotation);
 
     if(this.hasDoor)
     {
-      this.createDoor();
+      //this.createDoor();
     }
   }
 

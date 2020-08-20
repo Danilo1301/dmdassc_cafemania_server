@@ -37,36 +37,47 @@ GameLogic = class {
     this.userData.inventory = [];
     this.userData.tiles = {};
 
-    for (var y = 0; y < 6; y++) {
-      for (var x = 0; x < 4; x++) {
-        this.userData.tiles[`${x}:${y}`] = {
-          objects: [],
-          x: x,
-          y: y
+    var size = [5,7];
+
+    for (var y = 0; y < size[1]; y++) {
+      for (var x = 0; x < size[0]; x++) {
+
+        this.createTile(x, y);
+
+
+        if(x == 0)
+        {
+          var wall = this.createFloor(TILE_ITEM.WALL_0);
+          if(y == 1)
+          {
+            this.createDoorAtWall(wall, 0);
+          }
+          this.placeItem(wall, x, y);
         }
 
-        var customFloor = this.createFloor(Math.random() > 0.5 ? TILE_ITEM.FLOOR_1 : TILE_ITEM.FLOOR_0);
-        customFloor.data.custom = 123;
+        if(y == 0)
+        {
+          var wall = this.createFloor(TILE_ITEM.WALL_0);
+          wall.data.rotation = 1;
+          this.placeItem(wall, x, y);
+
+          console.warn(wall)
+        }
+
+
+
+        var customFloor = this.createFloor(TILE_ITEM.FLOOR_0);
         this.placeItem(customFloor, x, y);
       }
     }
 
-    for (var y = 0; y < 6; y++) {
-      for (var x = 4; x < 15; x++) {
-        if(Math.random() > 0.3 )
-        {
-          this.userData.tiles[`${x}:${y}`] = {
-            objects: [],
-            x: x,
-            y: y
-          }
-        }
 
+    for (var y = 0; y < size[1] + 10; y++) { this.createTile(-1, y); }
+    this.createTile(-1, -1);
+    for (var x = 0; x < size[0] + 10; x++) { this.createTile(x, -1); }
 
-      }
-    }
-
-
+    var chair = this.createChair(TILE_ITEM.CHAIR_0);
+    this.placeItem(chair, 4, 4);
 
     //console.log(this.userData)
   }
@@ -76,6 +87,15 @@ GameLogic = class {
     for (var tile_key in this.userData.tiles) {
       var tile = this.userData.tiles[tile_key];
       Events.trigger("UPDATE_TILE", {x: tile.x, y: tile.y});
+    }
+  }
+
+  static createTile(x, y)
+  {
+    this.userData.tiles[`${x}:${y}`] = {
+      objects: [],
+      x: x,
+      y: y
     }
   }
 
@@ -177,6 +197,19 @@ GameLogic = class {
     var item = this.createDefaultItem(id);
     item.data.justAFloor = true;
     return item;
+  }
+
+  static createChair(id)
+  {
+    var item = this.createDefaultItem(id);
+    item.data.chairo = 13;
+    return item;
+  }
+
+  static createDoorAtWall(wall, id)
+  {
+    wall.data.door = id;
+    return wall;
   }
 
   static createWall(id)
