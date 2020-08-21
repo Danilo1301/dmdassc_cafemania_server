@@ -114,8 +114,8 @@ class TileHitbox
   {
 
     var point0 = [TileMap.tileSize.width/2, 0]; //right bottom
-    var point1 = [TileMap.tileSize.width/2, -TileMap.tileSize.height*2] //right top
-    var point2 = [0, -TileMap.tileSize.height*2 + TileMap.tileSize.height/2] //left top
+    var point1 = [TileMap.tileSize.width/2, -TileMap.tileSize.height*2.5] //right top
+    var point2 = [0, -TileMap.tileSize.height*2.5 + TileMap.tileSize.height/2] //left top
     var point3 = [0, TileMap.tileSize.height/2] //left bottom
 
 
@@ -190,16 +190,17 @@ class TileItem {
 
   setRotation(rotation)
   {
+    var atTile = this.placedAtTile;
     this.data.rotation = rotation;
 
     this.destroy();
 
     this.createSprites();
 
-    if(this.placedAtTile)
+    if(atTile)
     {
-      this.placedAtTile.removeItem(this.uniqueid);
-      this.placedAtTile.placeItem(this);
+      atTile.removeItem(this.uniqueid);
+      atTile.placeItem(this);
     }
   }
 
@@ -231,7 +232,10 @@ class TileItem {
 
       if(this.type == TILE_ITEM_TYPE.CHAIR)
       {
+
+
         sprite = new PIXI.AnimatedSprite([textures[0]]);
+
 
         this.sprite_topchair = new PIXI.AnimatedSprite([textures[1]]);
         this.sprite_topchair.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
@@ -244,11 +248,15 @@ class TileItem {
       sprite.animationSpeed = 0.05;
       sprite.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
 
+
+
       if(this.type == TILE_ITEM_TYPE.WALL)
       {
         var back = new PIXI.Sprite(Game.resources["wallback"].texture);
         back.pivot.set((back.width-sprite.width) + TileMap.tileSize.width/2, back.height-TileMap.tileSize.height/2);
         spriteContainer.addChild(back);
+
+
       }
 
 
@@ -281,7 +289,7 @@ class TileItem {
         );
       }
 
-      hitbox.alpha = 0.2;
+      hitbox.alpha = 0.0;
       hitbox.interactive = true;
       hitbox.buttonMode = true;
       hitbox.pivot.set(TileMap.tileSize.width/2, TileMap.tileSize.height/2);
@@ -302,6 +310,8 @@ class TileItem {
     if(this.data.door != undefined)
     {
       this.createDoor();
+
+
     }
 
     //this.createMoveSprite();
@@ -392,6 +402,11 @@ class TileItemWall extends TileItem {
     this.doors = [];
   }
 
+  createDoorHole()
+  {
+
+  }
+
   createDoor()
   {
     this.hasDoor = true;
@@ -402,11 +417,21 @@ class TileItemWall extends TileItem {
 
       var sprite = part.sprite;
 
-      var mask = new PIXI.Sprite(Game.resources["wallmask"].texture);
-      mask.pivot.set((mask.width-sprite.width) + TileMap.tileSize.width/2, mask.height-TileMap.tileSize.height/2);
+      if(!part.wallMask)
+      {
+        var wallMask;
+        wallMask = new PIXI.Graphics();
+        wallMask.beginFill(0xFFFFFF);
+        wallMask.moveTo(0, 0);
+        wallMask.lineTo(140, 0);
+        wallMask.lineTo(140, 65);
+        wallMask.lineTo(0, 135);
+        wallMask.pivot.set(TileMap.tileSize.width/2, sprite.height-TileMap.tileSize.height/2);
 
-      part.container.addChild(mask);
-      sprite.mask = mask;
+        part.wallMask = wallMask;
+      }
+
+
 
       var door = new PIXI.projection.Sprite2d(PIXI.Texture.from('/assets/images/door.png'));
       door.anchor.set(1, 1);
@@ -415,6 +440,9 @@ class TileItemWall extends TileItem {
       door.rotation = -0.46
 
       part.container.addChild(door);
+      part.container.addChild(part.wallMask);
+
+      sprite.mask = part.wallMask;
 
       this.doors.push(door);
     }

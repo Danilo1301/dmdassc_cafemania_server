@@ -72,9 +72,9 @@ GameLogic = class {
     }
 
 
-    for (var y = 0; y < size[1] + 10; y++) { this.createTile(-1, y); }
-    this.createTile(-1, -1);
-    for (var x = 0; x < size[0] + 10; x++) { this.createTile(x, -1); }
+    //for (var y = 0; y < size[1] + 10; y++) { this.createTile(-1, y); }
+    //this.createTile(-1, -1);
+    //for (var x = 0; x < size[0] + 10; x++) { this.createTile(x, -1); }
 
     var chair = this.createChair(TILE_ITEM.CHAIR_0);
     this.placeItem(chair, 4, 4);
