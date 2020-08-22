@@ -25,12 +25,12 @@ Gen3DPlayer = class {
     var layers = this.getFolders(part);
 
     for (var layer of layers) {
-      data.layers[layer] = {skins: {}};
+      //data.layers[layer] ;
 
       var skins = this.getFolders(part + "/" + layer);
 
       for (var skin of skins) {
-        data.layers[layer].skins[skin] = {};
+        data.layers[layer] = skins;
       }
     }
 

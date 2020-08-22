@@ -61,7 +61,6 @@ GameLogic = class {
           wall.data.rotation = 1;
           this.placeItem(wall, x, y);
 
-          console.warn(wall)
         }
 
 
@@ -84,6 +83,8 @@ GameLogic = class {
 
   static setupGame()
   {
+    SceneTileMap.createOutsideTiles();
+    
     for (var tile_key in this.userData.tiles) {
       var tile = this.userData.tiles[tile_key];
       Events.trigger("UPDATE_TILE", {x: tile.x, y: tile.y});
@@ -223,7 +224,6 @@ GameLogic = class {
   {
     //item.data.rotation = 0;
 
-    console.log("place item", item)
 
     var canPlace = this.canItemBePlaced(item, x, y);
 

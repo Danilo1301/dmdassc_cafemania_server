@@ -164,7 +164,6 @@ class TileItem {
 
   setData(data)
   {
-    console.log(data)
     this.id = data.id;
     this.uniqueid = data.uniqueid;
     this.data = data.data;
